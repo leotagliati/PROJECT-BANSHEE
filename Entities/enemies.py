@@ -6,7 +6,7 @@ class BasicEnemy:
     def __init__(self,x,y):
         self.rect = pygame.Rect(x,y,40,36)
         self.speed = 2
-        self.max_health = 15
+        self.max_health = 3
         self.health = self.max_health
 
     def update(self):

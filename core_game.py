@@ -97,10 +97,12 @@ def run_game(input_system=None):
         for b in playerBullets[:]:
             for e in enemies[:]:
              if b.rect.colliderect(e.rect):
-                enemies.remove(e)
-                spawn_system.add_budget(3)
+                e.health -= 1;
                 playerBullets.remove(b)
-                score += 10
+                if(e.health <= 0):
+                    enemies.remove(e)
+                    spawn_system.add_budget(3)
+                    score += 10
                 break
 
         # colisão com player
