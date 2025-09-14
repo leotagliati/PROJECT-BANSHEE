@@ -1,11 +1,11 @@
 import pygame, random, sys
-from game_config import WIDTH, HEIGHT, screen, clock
+from game_config import WIDTH, HEIGHT, screen, clock, pin_map
 from ui_display import display_hud
 from Entities.player import Player
 from Entities.basic_enemy import BasicEnemy
 from Entities.bullet import Bullet
 
-def run_game():
+def run_game(input_system=None):
     # --- Instâncias ---
     player = Player(50, HEIGHT//2)
     bullets = []
@@ -26,6 +26,15 @@ def run_game():
     running = True
     while running:
         dt = clock.tick(60)
+        
+        input_system.update()
+        
+        actions = {
+        "UP": input_system.is_pressed_edge("UP"),
+        "DOWN": input_system.is_pressed_edge("DOWN"),
+        "LEFT": input_system.is_pressed_edge("LEFT"),
+        "RIGHT": input_system.is_pressed_edge("RIGHT")
+    }
 
         # --- Eventos ---
         for event in pygame.event.get():
@@ -35,15 +44,14 @@ def run_game():
                 y = random.randint(10, HEIGHT - 40)
                 enemies.append(BasicEnemy(WIDTH + 10, y))
 
-        keys = pygame.key.get_pressed()
 
         # --- Player ---
-        player.move(keys)
+        player.move(actions)
         player.rect.clamp_ip(pygame.Rect(0, 0, WIDTH, HEIGHT-30))
 
         # --- Tiros ---
         now = pygame.time.get_ticks()
-        if keys[pygame.K_SPACE] and now - last_shot >= shot_delay:
+        if input_system.is_pressed_edge("FIRE") and now - last_shot >= shot_delay:
             bullets.append(Bullet(player.rect.right + 4, player.rect.centery - 3))
             last_shot = now
 

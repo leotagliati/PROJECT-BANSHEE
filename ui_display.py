@@ -1,4 +1,3 @@
-# ui_display.py
 import pygame, sys
 from game_config import FONT, WIDTH, HEIGHT, screen, clock
 
@@ -8,7 +7,11 @@ def draw_text(text, size, y, color=(255,255,255)):
     rect = surf.get_rect(center=(WIDTH//2, y))
     screen.blit(surf, rect)
 
-def menu():
+def menu(input_system=None):
+    """
+    input_system: instância do InputSystem opcional.
+    Se fornecido, o menu pode ser navegado com botões físicos.
+    """
     while True:
         clock.tick(60)
         screen.fill((8, 12, 30))
@@ -17,21 +20,36 @@ def menu():
         draw_text("ESC para sair", 18, HEIGHT//2 + 40, (180,180,180))
         pygame.display.flip()
 
-        for e in pygame.event.get():
-            if e.type == pygame.QUIT:
-                pygame.quit(); sys.exit()
-            if e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_RETURN:
-                    return "start"
-                if e.key == pygame.K_ESCAPE:
-                    return "exit"
+        # --- Atualiza InputSystem se houver ---
+        if input_system:
+            input_system.update()
+            input_system.debug_print_buttons()
 
-def game_over(score):
+        # for e in pygame.event.get():
+        #     if e.type == pygame.QUIT:
+        #         pygame.quit(); sys.exit()
+        #     if e.type == pygame.KEYDOWN:
+        #         if e.key == pygame.K_RETURN:
+        #             return "start"
+        #         if e.key == pygame.K_ESCAPE:
+        #             return "exit"
+
+        # --- Verifica botões do Raspberry Pi ---
+            if input_system.is_pressed_edge("FIRE"):  # botão para "start"
+                return "start"
+            if input_system.is_pressed("EXIT"):  # opcional, botão para sair
+                return "exit"
+
+def game_over(score, input_system=None):
     screen.fill((40, 6, 6))
     draw_text("GAME OVER", 48, HEIGHT//2 - 20, (255,90,90))
     draw_text(f"Score: {score}", 28, HEIGHT//2 + 30, (230,230,230))
     pygame.display.flip()
     pygame.time.delay(2000)
+
+    # Permite reiniciar com botão físico
+    if input_system:
+        input_system.update()
     return "menu"
 
 def display_hud(score):

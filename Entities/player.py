@@ -5,14 +5,18 @@ class Player:
         self.rect = pygame.Rect(x,y,40,36)
         self.speed = 4
 
-    def move(self, keys):
-        if keys[pygame.K_LEFT]:
+    def move(self, actions):
+        """
+        actions: dict de bools
+        exemplo: {"UP": True, "DOWN": False, "LEFT": True, "RIGHT": False} (falso seria pressionado)
+        """
+        if actions.get("LEFT", False):
             self.rect.x -= self.speed
-        if keys[pygame.K_RIGHT]:
+        if actions.get("RIGHT", False):
             self.rect.x += self.speed
-        if keys[pygame.K_UP]:
+        if actions.get("UP", False):
             self.rect.y -= self.speed
-        if keys[pygame.K_DOWN]:
+        if actions.get("DOWN", False):
             self.rect.y += self.speed
 
     def draw(self,screen):
