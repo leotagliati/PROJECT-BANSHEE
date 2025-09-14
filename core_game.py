@@ -75,13 +75,15 @@ def run_game():
                     break
             if hit:
                 bullets.remove(b)
-                enemies.remove(hit)
-                score += 10
+                e.health -= 1
+                if e.health <= 0:
+                    enemies.remove(hit)
+                    score += 10
 
         # --- Colisão inimigo x player ---
         for e in enemies:
             if e.rect.colliderect(player.rect):
-                return score  # retorna score para game_over/menu
+                return score 
 
         # --- Desenho ---
         screen.fill((6, 8, 18))
