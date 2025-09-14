@@ -30,10 +30,10 @@ def run_game(input_system=None):
         input_system.update()
         
         actions = {
-        "UP": input_system.is_pressed_edge("UP"),
-        "DOWN": input_system.is_pressed_edge("DOWN"),
-        "LEFT": input_system.is_pressed_edge("LEFT"),
-        "RIGHT": input_system.is_pressed_edge("RIGHT")
+        "UP": input_system.is_pressed("UP"),
+        "DOWN": input_system.is_pressed("DOWN"),
+        "LEFT": input_system.is_pressed("LEFT"),
+        "RIGHT": input_system.is_pressed("RIGHT")
     }
 
         # --- Eventos ---
@@ -51,7 +51,7 @@ def run_game(input_system=None):
 
         # --- Tiros ---
         now = pygame.time.get_ticks()
-        if input_system.is_pressed_edge("FIRE") and now - last_shot >= shot_delay:
+        if input_system.is_pressed("FIRE") and now - last_shot >= shot_delay:
             bullets.append(Bullet(player.rect.right + 4, player.rect.centery - 3))
             last_shot = now
 

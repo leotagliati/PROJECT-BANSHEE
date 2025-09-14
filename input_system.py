@@ -26,10 +26,10 @@ class InputSystem:
             self.states[action] = (GPIO.input(pin) == GPIO.LOW)
 
         # Debug print a cada debug_interval
-        now = time.time()
-        if now - self.last_debug >= self.debug_interval:
-            self.debug_print_buttons()
-            self.last_debug = now
+        # now = time.time()
+        # if now - self.last_debug >= self.debug_interval:
+        #     self.debug_print_buttons()
+        #     self.last_debug = now
 
     def is_pressed(self, action):
         return self.states.get(action, False)
