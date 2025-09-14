@@ -4,6 +4,7 @@ class Player:
     def __init__(self,x,y):
         self.rect = pygame.Rect(x,y,40,36)
         self.speed = 4
+        
 
     def move(self, actions):
         """

@@ -35,7 +35,7 @@ def menu(input_system=None):
         #             return "exit"
 
         # --- Verifica botões do Raspberry Pi ---
-            if input_system.is_pressed_edge("FIRE"):  # botão para "start"
+            if input_system.is_pressed_edge("FIRE") or pygame.K_1:  # botão para "start"
                 return "start"
             if input_system.is_pressed("EXIT"):  # opcional, botão para sair
                 return "exit"

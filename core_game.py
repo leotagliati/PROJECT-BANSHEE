@@ -2,14 +2,17 @@ import pygame, random, sys
 from game_config import WIDTH, HEIGHT, screen, clock, pin_map
 from ui_display import display_hud
 from Entities.player import Player
-from Entities.basic_enemy import BasicEnemy
-from Entities.bullet import Bullet
+from Entities.enemies import BasicEnemy, ShooterEnemy
+from Entities.bullets import PlayerBullet, EnemyBullet
+from spawn_system import SpawnSystem
 
 def run_game(input_system=None):
     # --- Instâncias ---
     player = Player(50, HEIGHT//2)
-    bullets = []
+    playerBullets = []
+    enemiesBullets = []
     enemies = []
+    spawn_system = SpawnSystem(30)
 
     # Timer inimigos
     enemy_timer = pygame.USEREVENT + 1
@@ -42,19 +45,29 @@ def run_game(input_system=None):
                 pygame.quit(); sys.exit()
             if event.type == enemy_timer:
                 y = random.randint(10, HEIGHT - 40)
-                enemies.append(BasicEnemy(WIDTH + 10, y))
+                enemy = spawn_system.spawn_enemy() 
+                if enemy:
+                    enemies.append(enemy) # se ele nao conseguir spawnanr, nao adiciono
 
 
         # --- Player ---
         player.move(actions)
         player.rect.clamp_ip(pygame.Rect(0, 0, WIDTH, HEIGHT-30))
 
-        # --- Tiros ---
+        # --- Tiros player ---
         now = pygame.time.get_ticks()
         if input_system.is_pressed("FIRE") and now - last_shot >= shot_delay:
-            bullets.append(Bullet(player.rect.right + 4, player.rect.centery - 3))
+            playerBullets.append(PlayerBullet(player.rect.right + 4, player.rect.centery - 3))
             last_shot = now
 
+        # --- Acoes inimigos ---
+        for e in enemies:
+            if isinstance(e, BasicEnemy):
+                e.update()
+            if (isinstance(e, ShooterEnemy)):
+                e.update(enemiesBullets)
+        
+        
         # --- Fundo ---
         for s in stars:
             s[0] -= bg_base_speed * s[2]
@@ -63,35 +76,38 @@ def run_game(input_system=None):
                 s[1] = random.randrange(0, HEIGHT)
 
         # --- Atualiza balas ---
-        for b in bullets[:]:
+        for b in playerBullets[:]:
             b.update()
             if b.rect.left > WIDTH:
-                bullets.remove(b)
+                playerBullets.remove(b)
 
+        for b in enemiesBullets[:]:
+            b.update()
+            if b.rect.x < 0:  # saiu da tela
+                enemiesBullets.remove(b)
+                
         # --- Atualiza inimigos ---
         for e in enemies[:]:
             e.move()
             if e.rect.right < 0 or e.rect.top > HEIGHT + 50 or e.rect.bottom < -50:
                 enemies.remove(e)
 
-        # --- Colisões balas x inimigos ---
-        for b in bullets[:]:
-            hit = None
-            for e in enemies:
-                if b.rect.colliderect(e.rect):
-                    hit = e
-                    break
-            if hit:
-                bullets.remove(b)
-                e.health -= 1
-                if e.health <= 0:
-                    enemies.remove(hit)
-                    score += 10
 
-        # --- Colisão inimigo x player ---
-        for e in enemies:
-            if e.rect.colliderect(player.rect):
-                return score 
+        # colisão com inimigo
+        for b in playerBullets[:]:
+            for e in enemies[:]:
+             if b.rect.colliderect(e.rect):
+                enemies.remove(e)
+                spawn_system.add_budget(3)
+                playerBullets.remove(b)
+                score += 10
+                break
+
+        # colisão com player
+        for b in enemiesBullets[:]:
+         if b.rect.colliderect(player.rect):
+            enemiesBullets.remove(b)
+            return score
 
         # --- Desenho ---
         screen.fill((6, 8, 18))
@@ -100,10 +116,13 @@ def run_game(input_system=None):
             pygame.draw.circle(screen, (200,200,255), (int(s[0]), int(s[1])), r)
 
         player.draw(screen)
-        for b in bullets:
-            b.draw(screen)
         for e in enemies:
             e.draw(screen)
+        for b in playerBullets:
+            b.draw(screen)
+        for b in enemiesBullets:
+            b.draw(screen)
+            
 
         display_hud(score)
         pygame.display.flip()
