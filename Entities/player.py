@@ -2,7 +2,8 @@ import pygame
 
 class Player:
     def __init__(self,x,y):
-        self.rect = pygame.Rect(x,y,40,36)
+        self.image = pygame.image.load("Assets/playerShip.png").convert_alpha()
+        self.rect = self.image.get_rect(topleft=(x, y))
         self.speed = 6
         
 
@@ -23,6 +24,4 @@ class Player:
     def draw(self, screen):
         px, py = self.rect.topleft
         pw, ph = self.rect.size
-        ship_surf = pygame.Surface((pw, ph), pygame.SRCALPHA)
-        pygame.draw.polygon(ship_surf, (60,180,255), [(pw, ph//2), (0, 0), (0, ph)])
-        screen.blit(ship_surf, (px, py))
+        screen.blit(self.image, (px, py))

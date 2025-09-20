@@ -4,7 +4,8 @@ from Entities.bullets import EnemyBullet
 
 class BasicEnemy:
     def __init__(self,x,y):
-        self.rect = pygame.Rect(x,y,40,36)
+        self.image = pygame.image.load("Assets/enemyBasicShip.png").convert_alpha()
+        self.rect = self.image.get_rect(topleft=(x, y))
         self.speed = 1
         self.max_health = 3
         self.health = self.max_health
@@ -18,9 +19,8 @@ class BasicEnemy:
     def draw(self,screen):
         px,py = self.rect.topleft
         pw,ph = self.rect.size
-        ship_surf = pygame.Surface((pw, ph), pygame.SRCALPHA)
-        pygame.draw.polygon(ship_surf, (255, 0, 0), [(0, ph//2), (pw, 0), (pw, ph)])
-        screen.blit(ship_surf, (px, py))
+        screen.blit(self.image, (px, py))
+
         
         # --- Barra de vida ---
         if self.health >= 1:
@@ -32,7 +32,9 @@ class BasicEnemy:
 
 class ShooterEnemy:
     def __init__(self, x, y, fire_rate=2000):  # fire_rate em ms
-        self.rect = pygame.Rect(x,y,40,36)
+
+        self.image = pygame.image.load("Assets/enemyShooterShip.png").convert_alpha()
+        self.rect = self.image.get_rect(topleft=(x, y))
         self.speed = 1
         self.max_health = 3
         self.health = self.max_health
@@ -53,9 +55,7 @@ class ShooterEnemy:
     def draw(self,screen):
         px,py = self.rect.topleft
         pw,ph = self.rect.size
-        ship_surf = pygame.Surface((pw, ph), pygame.SRCALPHA)
-        pygame.draw.polygon(ship_surf, (193, 132, 222), [(0, ph//2), (pw, 0), (pw, ph)])
-        screen.blit(ship_surf, (px, py))
+        screen.blit(self.image, (px, py))
         
         # --- Barra de vida ---
         if self.health >= 1:
