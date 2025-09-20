@@ -109,8 +109,15 @@ def run_game(input_system=None):
         for b in enemiesBullets[:]:
          if b.rect.colliderect(player.rect):
             enemiesBullets.remove(b)
+            pygame.time.set_timer(enemy_timer, 0) 
             return score
+        
+        for e in enemies[:]:
+            if player.rect.colliderect(e.rect):
+                pygame.time.set_timer(enemy_timer, 0) 
+                return score
 
+        
         # --- Desenho ---
         screen.fill((6, 8, 18))
         for s in stars:

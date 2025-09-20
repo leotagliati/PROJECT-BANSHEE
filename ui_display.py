@@ -8,19 +8,12 @@ def draw_text(text, size, y, color=(255,255,255)):
     screen.blit(surf, rect)
 
 def menu(input_system=None):
-    """
-    input_system: instância do InputSystem opcional.
-    Se fornecido, o menu pode ser navegado com botões físicos.
-    """
     while True:
         clock.tick(60)
         screen.fill((8, 12, 30))
-        draw_text("NANOSTRAY - SIDE", 40, HEIGHT//2 - 60, (100,200,255))
-        draw_text("ENTER para Jogar | Arrows mover | Espaço atira", 20, HEIGHT//2, (200,200,200))
-        draw_text("ESC para sair", 18, HEIGHT//2 + 40, (180,180,180))
+        draw_text("NANOSTRAY", 40, HEIGHT//2 - 60, (100,200,255))
         pygame.display.flip()
 
-        # --- Atualiza InputSystem se houver ---
         if input_system:
             input_system.update()
             # input_system.debug_print_buttons()
@@ -47,7 +40,6 @@ def game_over(score, input_system=None):
     pygame.display.flip()
     pygame.time.delay(2000)
 
-    # Permite reiniciar com botão físico
     if input_system:
         input_system.update()
     return "menu"

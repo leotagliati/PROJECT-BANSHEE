@@ -20,9 +20,9 @@ class Player:
         if actions.get("DOWN", False):
             self.rect.y += self.speed
 
-    def draw(self,screen):
-        px,py = self.rect.topleft
-        pw,ph = self.rect.size
+    def draw(self, screen):
+        px, py = self.rect.topleft
+        pw, ph = self.rect.size
         ship_surf = pygame.Surface((pw, ph), pygame.SRCALPHA)
-        pygame.draw.polygon(ship_surf, (60,180,255), [(0, ph//2), (pw, 0), (pw, ph)])
+        pygame.draw.polygon(ship_surf, (60,180,255), [(pw, ph//2), (0, 0), (0, ph)])
         screen.blit(ship_surf, (px, py))

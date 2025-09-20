@@ -5,7 +5,7 @@ from Entities.bullets import EnemyBullet
 class BasicEnemy:
     def __init__(self,x,y):
         self.rect = pygame.Rect(x,y,40,36)
-        self.speed = 2
+        self.speed = 1
         self.max_health = 3
         self.health = self.max_health
 
@@ -33,7 +33,7 @@ class BasicEnemy:
 class ShooterEnemy:
     def __init__(self, x, y, fire_rate=2000):  # fire_rate em ms
         self.rect = pygame.Rect(x,y,40,36)
-        self.speed = 2
+        self.speed = 1
         self.max_health = 3
         self.health = self.max_health
         self.fire_rate = fire_rate
