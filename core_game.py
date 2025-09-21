@@ -89,6 +89,7 @@ def run_game(input_system=None):
         # --- Atualiza inimigos ---
         for e in enemies[:]:
             e.move()
+            
             if e.rect.right < 0 or e.rect.top > HEIGHT + 50 or e.rect.bottom < -50:
                 enemies.remove(e)
 

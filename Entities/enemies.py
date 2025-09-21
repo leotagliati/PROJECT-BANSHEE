@@ -1,10 +1,13 @@
 import pygame
+import os
 
 from Entities.bullets import EnemyBullet
 
 class BasicEnemy:
     def __init__(self,x,y):
-        self.image = pygame.image.load("Assets/enemyBasicShip.png").convert_alpha()
+        base_path = os.path.dirname(os.path.dirname(__file__))
+        assets_path = os.path.join(base_path, "Assets", "enemyBasicShip.png")
+        self.image = pygame.image.load(assets_path).convert_alpha()
         self.rect = self.image.get_rect(topleft=(x, y))
         self.speed = 1
         self.max_health = 3
@@ -32,8 +35,10 @@ class BasicEnemy:
 
 class ShooterEnemy:
     def __init__(self, x, y, fire_rate=2000):  # fire_rate em ms
-
-        self.image = pygame.image.load("Assets/enemyShooterShip.png").convert_alpha()
+        base_path = os.path.dirname(os.path.dirname(__file__))  # sobe até PROJECT-BANSHEE
+        assets_path = os.path.join(base_path, "Assets", "enemyShooterShip.png")
+        self.image = pygame.image.load(assets_path).convert_alpha()
+        # self.image = pygame.image.load("Assets/enemyShooterShip.png").convert_alpha()
         self.rect = self.image.get_rect(topleft=(x, y))
         self.speed = 1
         self.max_health = 3

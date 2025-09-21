@@ -1,8 +1,11 @@
 import pygame
+import os
 
 class Player:
     def __init__(self,x,y):
-        self.image = pygame.image.load("Assets/playerShip.png").convert_alpha()
+        base_path = os.path.dirname(os.path.dirname(__file__))  # sobe até PROJECT-BANSHEE
+        assets_path = os.path.join(base_path, "Assets", "playerShip.png")
+        self.image = pygame.image.load(assets_path).convert_alpha()
         self.rect = self.image.get_rect(topleft=(x, y))
         self.speed = 6
         
