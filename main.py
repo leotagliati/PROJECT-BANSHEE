@@ -8,16 +8,21 @@ from input_system import InputSystem
 def main():
     pygame.init()
     input_system = InputSystem(pin_map)
+    
     while True:
-        choice = menu(input_system)
-        if choice == "start":
-            score = run_game(input_system)
+        choice = menu(input_system)  # choice é agora um dict
+        action = choice.get("action")
+        player_name = choice.get("name")  # pega o nome digitado
+
+        if action == "start":
+            score = run_game(input_system, player_name)  # se quiser passar o nome pro jogo
             next_action = game_over(score, input_system)
             if next_action == "menu":
                 continue
-        elif choice == "exit":
+        elif action == "exit":
             pygame.quit()
             sys.exit()
+
 
 if __name__ == "__main__":
     main()

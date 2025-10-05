@@ -8,30 +8,58 @@ def draw_text(text, size, y, color=(255,255,255)):
     screen.blit(surf, rect)
 
 def menu(input_system=None):
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ "  # inclui espaço
+    player_name = [""] * 12  # limite de 12 caracteres
+    current_index = 0        # posição do cursor no nome
+    char_index = 0           # letra selecionada no alfabeto
+    cursor_visible = True
+    cursor_timer = 0
+
     while True:
-        clock.tick(60)
+        dt = clock.tick(60)
+        cursor_timer += dt
+        if cursor_timer >= 500:  # alterna o cursor a cada 500ms
+            cursor_visible = not cursor_visible
+            cursor_timer = 0
+
         screen.fill((8, 12, 30))
         draw_text("NANOSTRAY", 40, HEIGHT//2 - 60, (100,200,255))
+        draw_text("Digite seu nome:", 28, HEIGHT//2 - 20, (200,200,200))
+
+        # Mostra o nome + cursor na posição atual
+        display_name = "".join(player_name)
+        if cursor_visible:
+            display_name = display_name[:current_index] + "|" + display_name[current_index+1:]
+        draw_text(display_name or "_", 28, HEIGHT//2 + 20, (255,255,255))
+
+        draw_text("Pressione FIRE para começar", 20, HEIGHT - 60, (160,160,160))
         pygame.display.flip()
 
         if input_system:
             input_system.update()
-            # input_system.debug_print_buttons()
 
-        # for e in pygame.event.get():
-        #     if e.type == pygame.QUIT:
-        #         pygame.quit(); sys.exit()
-        #     if e.type == pygame.KEYDOWN:
-        #         if e.key == pygame.K_RETURN:
-        #             return "start"
-        #         if e.key == pygame.K_ESCAPE:
-        #             return "exit"
+            # Navega pelas letras
+            if input_system.is_pressed_edge("UP"):
+                char_index = (char_index + 1) % len(alphabet)
+            if input_system.is_pressed_edge("DOWN"):
+                char_index = (char_index - 1) % len(alphabet)
 
-        # --- Verifica botões do Raspberry Pi ---
-            if input_system.is_pressed_edge("FIRE"):  # botão para "start"
-                return "start"
-            if input_system.is_pressed("EXIT"):  # opcional, botão para sair
-                return "exit"
+            # Navega pelo índice do nome
+            if input_system.is_pressed_edge("RIGHT"):
+                current_index = min(current_index + 1, 11)
+            if input_system.is_pressed_edge("LEFT"):
+                current_index = max(current_index - 1, 0)
+
+            # Atribui letra selecionada ao índice atual
+            player_name[current_index] = alphabet[char_index]
+
+            # FIRE → inicia o jogo
+            if input_system.is_pressed_edge("FIRE"):
+                final_name = "".join(player_name).rstrip()
+                if final_name.strip() == "":
+                    final_name = "Jogador"
+                return {"action": "start", "name": final_name}
+
 
 def game_over(score, input_system=None):
     screen.fill((40, 6, 6))
