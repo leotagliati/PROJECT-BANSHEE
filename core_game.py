@@ -1,10 +1,31 @@
-import pygame, random, sys
-from game_config import WIDTH, HEIGHT, screen, clock, pin_map
+import pygame, random, sys, requests
+from game_config import WIDTH, HEIGHT, screen, clock, apiKey
 from ui_display import display_hud, win_screen
 from Entities.player import Player
 from Entities.enemies import BasicEnemy, ShooterEnemy, MotherEnemy
 from Entities.bullets import PlayerBullet, EnemyBullet
 from spawn_system import SpawnSystem
+
+
+def send_score_to_server(score, player_name):
+    try:
+        url = "https://industrial.api.ubidots.com/api/v1.6/devices/rasp"
+        data = {
+            "Score": {
+                "value": score,
+                "context": {
+                    "player": player_name or "unknown"
+                }
+            }
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "X-Auth-Token": apiKey
+        }
+        response = requests.post(url, json=data, headers=headers)
+        print(f"Score enviado ({response.status_code}): {score} por {player_name}")
+    except Exception as e:
+        print("Erro ao enviar score:", e)
 
 
 def run_game(input_system=None, player_name=None):
@@ -15,23 +36,22 @@ def run_game(input_system=None, player_name=None):
     enemies = []
     spawn_system = SpawnSystem(30)
 
-    # Timer inimigos
+    # Timers
     enemy_timer = pygame.USEREVENT + 1
     pygame.time.set_timer(enemy_timer, 900)
 
-    # Timer para boss (30 segundos)
     boss_timer = pygame.USEREVENT + 2
     pygame.time.set_timer(boss_timer, 30000)  # 30s
 
-    # Fundo (estrelas)
+    # Fundo
     stars = [[random.randrange(0, WIDTH), random.randrange(0, HEIGHT), random.uniform(0.3, 1.2)] for _ in range(120)]
     bg_base_speed = 2.2
 
     score = 0
     last_shot = 0
-    shot_delay = 200  # ms
-
+    shot_delay = 200
     running = True
+
     while running:
         dt = clock.tick(60)
 
@@ -56,7 +76,6 @@ def run_game(input_system=None, player_name=None):
                     enemies.append(enemy)
 
             if event.type == boss_timer:
-                # Spawn do boss e bloqueia mobs normais
                 boss = MotherEnemy(WIDTH - 120, HEIGHT / 2)
                 enemies.append(boss)
                 spawn_system.budget = -999
@@ -67,29 +86,27 @@ def run_game(input_system=None, player_name=None):
         player.move(actions)
         player.rect.clamp_ip(pygame.Rect(0, 0, WIDTH, HEIGHT - 30))
 
-        # --- Tiro do player ---
+        # --- Tiro ---
         now = pygame.time.get_ticks()
         if input_system.is_pressed("FIRE") and now - last_shot >= shot_delay:
             playerBullets.append(PlayerBullet(player.rect.right + 4, player.rect.centery - 3))
             last_shot = now
 
-        # --- Ações inimigos ---
+        # --- Inimigos ---
         for e in enemies:
             if isinstance(e, BasicEnemy):
                 e.update()
-            elif isinstance(e, ShooterEnemy):
-                e.update(enemiesBullets)
-            elif isinstance(e, MotherEnemy):
+            elif isinstance(e, (ShooterEnemy, MotherEnemy)):
                 e.update(enemiesBullets)
 
-        # --- Fundo (parallax) ---
+        # --- Fundo ---
         for s in stars:
             s[0] -= bg_base_speed * s[2]
             if s[0] < 0:
                 s[0] += WIDTH
                 s[1] = random.randrange(0, HEIGHT)
 
-        # --- Atualiza balas ---
+        # --- Balas ---
         for b in playerBullets[:]:
             b.update()
             if b.rect.left > WIDTH:
@@ -106,7 +123,8 @@ def run_game(input_system=None, player_name=None):
             if e.rect.right < 0 or e.rect.top > HEIGHT + 50 or e.rect.bottom < -50:
                 enemies.remove(e)
 
-        # --- Colisão: balas do player -> inimigos ---
+        # --- Colisões ---
+        # Player bullets -> enemies
         for b in playerBullets[:]:
             for e in enemies[:]:
                 if b.rect.colliderect(e.rect):
@@ -116,10 +134,11 @@ def run_game(input_system=None, player_name=None):
                     if e.health <= 0:
                         enemies.remove(e)
 
-                        # Se for o boss
+                        # Se for o boss (vitória)
                         if isinstance(e, MotherEnemy):
                             pygame.time.set_timer(enemy_timer, 0)
                             pygame.time.set_timer(boss_timer, 0)
+                            send_score_to_server(score, player_name)
                             return win_screen(score, input_system)
 
                         # Inimigo comum
@@ -128,18 +147,20 @@ def run_game(input_system=None, player_name=None):
                             score += 10
                     break
 
-        # --- Colisão: balas inimigas -> player ---
+        # Enemy bullets -> player (derrota)
         for b in enemiesBullets[:]:
             if b.rect.colliderect(player.rect):
                 pygame.time.set_timer(enemy_timer, 0)
                 pygame.time.set_timer(boss_timer, 0)
+                send_score_to_server(score, player_name)
                 return score
 
-        # --- Colisão: player -> inimigos ---
+        # Player -> enemies (colisão direta, derrota)
         for e in enemies[:]:
             if player.rect.colliderect(e.rect):
                 pygame.time.set_timer(enemy_timer, 0)
                 pygame.time.set_timer(boss_timer, 0)
+                send_score_to_server(score, player_name)
                 return score
 
         # --- Renderização ---
@@ -159,5 +180,6 @@ def run_game(input_system=None, player_name=None):
         for b in enemiesBullets:
             b.draw(screen)
 
+        # HUD
         display_hud(score)
         pygame.display.flip()

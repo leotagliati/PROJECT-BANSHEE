@@ -14,7 +14,6 @@ class SpawnSystem:
     def spawn_enemy(self, x_spawn=WIDTH+10):
         """Retorna UM inimigo (ou None se não houver orçamento)."""
         # Filtra só os inimigos que cabem no orçamento
-        print(self.budget)
         affordable = [e for e in ENEMY_TYPES if e["cost"] <= self.budget]
         if not affordable:
             return None  # não dá pra criar inimigos

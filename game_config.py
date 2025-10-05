@@ -6,6 +6,7 @@ WIDTH, HEIGHT = 800, 480
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 FONT = pygame.font.SysFont("Arial", 24)
+apiKey = 'a definir'
 
 pin_map = {
     10: "UP",
