@@ -73,7 +73,17 @@ def game_over(score, input_system=None):
     if input_system:
         input_system.update()
     return "menu"
+    
+def win_screen(score, input_system=None):
+    screen.fill((6, 40, 30))
+    draw_text("CONGRATULATIONS!", 48, HEIGHT//2 - 20, (90, 255, 112))
+    draw_text(f"Score: {score}", 28, HEIGHT//2 + 30, (230,230,230))
+    pygame.display.flip()
+    pygame.time.delay(6000)
 
+    if input_system:
+        input_system.update()
+    
 def display_hud(score):
     score_surf = FONT.render(f"Score: {score}", True, (220,220,220))
     screen.blit(score_surf, (8, 8))

@@ -10,12 +10,12 @@ def main():
     input_system = InputSystem(pin_map)
     
     while True:
-        choice = menu(input_system)  # choice é agora um dict
+        choice = menu(input_system) 
         action = choice.get("action")
-        player_name = choice.get("name")  # pega o nome digitado
+        player_name = choice.get("name")  
 
         if action == "start":
-            score = run_game(input_system, player_name)  # se quiser passar o nome pro jogo
+            score = run_game(input_system, player_name)  
             next_action = game_over(score, input_system)
             if next_action == "menu":
                 continue

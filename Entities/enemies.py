@@ -76,7 +76,7 @@ class ShooterEnemy:
     
     
 class MotherEnemy:
-    def __init__(self, x, y, fire_rate=1000, beam_rate=5000, beam_duration=1500):  
+    def __init__(self, x, y, fire_rate=500, beam_rate=5000, beam_duration=1500):  
         base_path = os.path.dirname(os.path.dirname(__file__))  
         assets_path = os.path.join(base_path, "Assets", "motherShip.png")
         self.image = pygame.image.load(assets_path).convert_alpha()

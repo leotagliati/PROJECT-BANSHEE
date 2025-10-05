@@ -1,14 +1,15 @@
 import pygame, random, sys
 from game_config import WIDTH, HEIGHT, screen, clock, pin_map
-from ui_display import display_hud
+from ui_display import display_hud, win_screen
 from Entities.player import Player
 from Entities.enemies import BasicEnemy, ShooterEnemy, MotherEnemy
 from Entities.bullets import PlayerBullet, EnemyBullet
 from spawn_system import SpawnSystem
 
+
 def run_game(input_system=None, player_name=None):
     # --- Instâncias ---
-    player = Player(50, HEIGHT//2)
+    player = Player(50, HEIGHT // 2)
     playerBullets = []
     enemiesBullets = []
     enemies = []
@@ -20,9 +21,9 @@ def run_game(input_system=None, player_name=None):
 
     # Timer para boss (30 segundos)
     boss_timer = pygame.USEREVENT + 2
-    pygame.time.set_timer(boss_timer, 30000)  # 30.000 ms = 30s
+    pygame.time.set_timer(boss_timer, 30000)  # 30s
 
-    # Fundo: estrelas
+    # Fundo (estrelas)
     stars = [[random.randrange(0, WIDTH), random.randrange(0, HEIGHT), random.uniform(0.3, 1.2)] for _ in range(120)]
     bg_base_speed = 2.2
 
@@ -33,39 +34,40 @@ def run_game(input_system=None, player_name=None):
     running = True
     while running:
         dt = clock.tick(60)
-        
+
+        # --- Input ---
         input_system.update()
-        
         actions = {
             "UP": input_system.is_pressed("UP"),
             "DOWN": input_system.is_pressed("DOWN"),
             "LEFT": input_system.is_pressed("LEFT"),
-            "RIGHT": input_system.is_pressed("RIGHT")
+            "RIGHT": input_system.is_pressed("RIGHT"),
         }
 
         # --- Eventos ---
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit(); sys.exit()
+                pygame.quit()
+                sys.exit()
 
             if event.type == enemy_timer:
-                enemy = spawn_system.spawn_enemy() 
+                enemy = spawn_system.spawn_enemy()
                 if enemy:
-                    enemies.append(enemy) # só adiciona se couber no budget
+                    enemies.append(enemy)
 
             if event.type == boss_timer:
                 # Spawn do boss e bloqueia mobs normais
-                boss = MotherEnemy(WIDTH-60, HEIGHT/2)
+                boss = MotherEnemy(WIDTH - 120, HEIGHT / 2)
                 enemies.append(boss)
                 spawn_system.budget = -999
-                pygame.time.set_timer(enemy_timer, 0)  # desliga spawns de mobs
-                pygame.time.set_timer(boss_timer, 0)   # desliga o timer do boss
+                pygame.time.set_timer(enemy_timer, 0)
+                pygame.time.set_timer(boss_timer, 0)
 
         # --- Player ---
         player.move(actions)
-        player.rect.clamp_ip(pygame.Rect(0, 0, WIDTH, HEIGHT-30))
+        player.rect.clamp_ip(pygame.Rect(0, 0, WIDTH, HEIGHT - 30))
 
-        # --- Tiros player ---
+        # --- Tiro do player ---
         now = pygame.time.get_ticks()
         if input_system.is_pressed("FIRE") and now - last_shot >= shot_delay:
             playerBullets.append(PlayerBullet(player.rect.right + 4, player.rect.centery - 3))
@@ -75,12 +77,12 @@ def run_game(input_system=None, player_name=None):
         for e in enemies:
             if isinstance(e, BasicEnemy):
                 e.update()
-            if isinstance(e, ShooterEnemy):
+            elif isinstance(e, ShooterEnemy):
                 e.update(enemiesBullets)
-            if isinstance(e, MotherEnemy):
+            elif isinstance(e, MotherEnemy):
                 e.update(enemiesBullets)
 
-        # --- Fundo ---
+        # --- Fundo (parallax) ---
         for s in stars:
             s[0] -= bg_base_speed * s[2]
             if s[0] < 0:
@@ -95,49 +97,60 @@ def run_game(input_system=None, player_name=None):
 
         for b in enemiesBullets[:]:
             b.update()
-            if b.rect.x < 0:  # saiu da tela
+            if b.rect.x < 0:
                 enemiesBullets.remove(b)
-                
-        # --- Atualiza inimigos ---
+
+        # --- Movimento inimigos ---
         for e in enemies[:]:
             e.move()
             if e.rect.right < 0 or e.rect.top > HEIGHT + 50 or e.rect.bottom < -50:
                 enemies.remove(e)
 
-        # Colisão balas -> inimigos
+        # --- Colisão: balas do player -> inimigos ---
         for b in playerBullets[:]:
             for e in enemies[:]:
                 if b.rect.colliderect(e.rect):
                     e.health -= 1
                     playerBullets.remove(b)
+
                     if e.health <= 0:
                         enemies.remove(e)
-                        if not isinstance(e, MotherEnemy):  # boss não dá budget
+
+                        # Se for o boss
+                        if isinstance(e, MotherEnemy):
+                            pygame.time.set_timer(enemy_timer, 0)
+                            pygame.time.set_timer(boss_timer, 0)
+                            return win_screen(score, input_system)
+
+                        # Inimigo comum
+                        else:
                             spawn_system.add_budget(3)
-                        score += 10
+                            score += 10
                     break
-        
-        # Colisão balas inimigos -> player
+
+        # --- Colisão: balas inimigas -> player ---
         for b in enemiesBullets[:]:
             if b.rect.colliderect(player.rect):
-                enemiesBullets.remove(b)
-                pygame.time.set_timer(enemy_timer, 0) 
+                pygame.time.set_timer(enemy_timer, 0)
                 pygame.time.set_timer(boss_timer, 0)
                 return score
-        
-        # Colisão player -> inimigo
+
+        # --- Colisão: player -> inimigos ---
         for e in enemies[:]:
             if player.rect.colliderect(e.rect):
-                pygame.time.set_timer(enemy_timer, 0) 
+                pygame.time.set_timer(enemy_timer, 0)
                 pygame.time.set_timer(boss_timer, 0)
                 return score
 
-        # --- Desenho ---
+        # --- Renderização ---
         screen.fill((6, 8, 18))
+
+        # Fundo estrelado
         for s in stars:
             r = 1 if s[2] < 0.6 else (2 if s[2] < 1.0 else 3)
-            pygame.draw.circle(screen, (200,200,255), (int(s[0]), int(s[1])), r)
+            pygame.draw.circle(screen, (200, 200, 255), (int(s[0]), int(s[1])), r)
 
+        # Player, inimigos e balas
         player.draw(screen)
         for e in enemies:
             e.draw(screen)
