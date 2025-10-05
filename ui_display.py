@@ -16,7 +16,7 @@ def menu(input_system=None):
     cursor_timer = 0
 
     while True:
-        dt = clock.tick(60)
+        dt = clock.tick(30)
         cursor_timer += dt
         if cursor_timer >= 500:  # alterna o cursor a cada 500ms
             cursor_visible = not cursor_visible
@@ -26,13 +26,12 @@ def menu(input_system=None):
         draw_text("NANOSTRAY", 40, HEIGHT//2 - 60, (100,200,255))
         draw_text("Digite seu nome:", 28, HEIGHT//2 - 20, (200,200,200))
 
-        # Mostra o nome + cursor na posição atual
         display_name = "".join(player_name)
         if cursor_visible:
             display_name = display_name[:current_index] + "|" + display_name[current_index+1:]
         draw_text(display_name or "_", 28, HEIGHT//2 + 20, (255,255,255))
 
-        draw_text("Pressione FIRE para começar", 20, HEIGHT - 60, (160,160,160))
+        draw_text("Pressione FIRE para começar", 20, HEIGHT - 80, (160,160,160))
         pygame.display.flip()
 
         if input_system:
@@ -46,7 +45,10 @@ def menu(input_system=None):
 
             # Navega pelo índice do nome
             if input_system.is_pressed_edge("RIGHT"):
-                current_index = min(current_index + 1, 11)
+                if current_index >= 11:
+                    current_index = 0
+                else: 
+                    current_index = min(current_index + 1, 11)
             if input_system.is_pressed_edge("LEFT"):
                 current_index = max(current_index - 1, 0)
 
