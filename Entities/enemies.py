@@ -5,27 +5,42 @@ from game_config import HEIGHT, WIDTH
 from Entities.bullets import EnemyBullet
 
 class BasicEnemy:
-    def __init__(self,x,y):
+    def __init__(self, x, y):
         base_path = os.path.dirname(os.path.dirname(__file__))
         assets_path = os.path.join(base_path, "Assets", "enemyBasicShip.png")
-        self.image = pygame.image.load(assets_path).convert_alpha()
+        self.original_image = pygame.image.load(assets_path).convert_alpha()  # guarda a imagem original
+        self.image = self.original_image
         self.rect = self.image.get_rect(topleft=(x, y))
+        
         self.speed = 1
         self.max_health = 3
         self.health = self.max_health
+        self.angle = 0 
+        self.rotation_speed = 0.8
 
     def update(self):
         self.move()
-    
+        self.rotate()
+
     def move(self):
         self.rect.x -= self.speed
 
-    def draw(self,screen):
-        px,py = self.rect.topleft
-        pw,ph = self.rect.size
+    def rotate(self):
+        # incrementa o ângulo e reinicia se passar de 360
+        self.angle = (self.angle + self.rotation_speed) % 360
+
+        # rotaciona a imagem sem distorcer
+        self.image = pygame.transform.rotate(self.original_image, self.angle)
+
+        # centraliza a rotação no centro da sprite
+        old_center = self.rect.center
+        self.rect = self.image.get_rect(center=old_center)
+
+    def draw(self, screen):
+        px, py = self.rect.topleft
+        pw, ph = self.rect.size
         screen.blit(self.image, (px, py))
 
-        
         # --- Barra de vida ---
         if self.health >= 1:
             bar_width = pw
@@ -76,7 +91,7 @@ class ShooterEnemy:
     
     
 class MotherEnemy:
-    def __init__(self, x, y, fire_rate=500, beam_rate=5000, beam_duration=1500):  
+    def __init__(self, x, y, fire_rate=700, beam_rate=5000, beam_duration=1500):  
         base_path = os.path.dirname(os.path.dirname(__file__))  
         assets_path = os.path.join(base_path, "Assets", "motherShip.png")
         self.image = pygame.image.load(assets_path).convert_alpha()
@@ -107,7 +122,6 @@ class MotherEnemy:
             self.shoot(bullets)
             self.last_fire = now
 
-        # beam
         if not self.beam_active and now - self.last_beam >= self.beam_rate:
             self.start_beam()
             self.last_beam = now
@@ -140,9 +154,8 @@ class MotherEnemy:
             pygame.draw.rect(screen, (255,0,0), (px, py - 8, bar_width, bar_height))
             pygame.draw.rect(screen, (0,255,0), (px, py - 8, fill, bar_height))
 
-        # desenhar beam se ativo
         if self.beam_active and self.beam_rect:
-            pygame.draw.rect(screen, (255, 0, 200), self.beam_rect)  # cor do raio
+            pygame.draw.rect(screen, (255, 0, 200), self.beam_rect)
 
     def shoot(self, bullets):
         bullets.append(EnemyBullet(self.rect.right - 4, self.rect.centery - 3))
@@ -150,10 +163,9 @@ class MotherEnemy:
     def start_beam(self):
         self.beam_active = True
         self.beam_start_time = pygame.time.get_ticks()
-        # cria um retângulo horizontal gigante
         self.beam_rect = pygame.Rect(
-            self.rect.right,  # começa do lado da nave
-            self.rect.centery - 10,  # centralizado
-            2000,  # largura absurda
-            20     # altura do feixe
+            self.rect.right,  
+            self.rect.centery - 10,  
+            2000, 
+            20    
         )

@@ -76,7 +76,7 @@ def run_game(input_system=None, player_name=None):
                     enemies.append(enemy)
 
             if event.type == boss_timer:
-                boss = MotherEnemy(WIDTH - 120, HEIGHT / 2)
+                boss = MotherEnemy(WIDTH - 130, HEIGHT / 2)
                 enemies.append(boss)
                 spawn_system.budget = -999
                 pygame.time.set_timer(enemy_timer, 0)

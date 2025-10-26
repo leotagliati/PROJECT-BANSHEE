@@ -22,7 +22,7 @@ class EnemyBullet:
         assets_path = os.path.join(base_path, "Assets", "enemyBullet.png")
         self.image = pygame.image.load(assets_path).convert_alpha()
         self.rect = self.image.get_rect(topleft=(x, y))
-        self.speed = 5
+        self.speed = 6
 
     def update(self):
         self.rect.x -= self.speed
