@@ -1,4 +1,4 @@
-# Console Portátil
+# Console Portátil (Vídeo demonstrativo na /docs)
 
 ## Descrição Geral
 Este projeto tem como objetivo o desenvolvimento de um **console portátil de jogos** utilizando a **Raspberry Pi 3** como unidade principal de processamento.  
