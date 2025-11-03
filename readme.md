@@ -81,3 +81,4 @@ Michelle Mitie Hamazaki
 RA: 20.00539-3
 
 ![alt text](Assets/grupo.jpeg)
+<video controls src="docs/video.mp4" title="Title"></video>
