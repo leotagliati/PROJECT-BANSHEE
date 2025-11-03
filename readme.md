@@ -48,7 +48,6 @@ Durante o desenvolvimento, foram analisadas as seguintes fontes técnicas:
 - **Documentação da biblioteca Pygame**  
   - [https://www.pygame.org/docs/](https://www.pygame.org/docs/)
   - Utilizada para controlar renderização gráfica e eventos dos botões.
-  - 
 
 Essas referências foram essenciais para compreender a comunicação entre o hardware e o software.
 
